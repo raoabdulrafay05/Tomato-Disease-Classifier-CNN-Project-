@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tomato Disease Classifier</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Optional: Your own styles -->
+    <link rel="stylesheet" href="/static/index.css" />
+  </head>
+  <body
+    class="min-h-screen bg-cover bg-center flex flex-col items-center justify-center p-6"
+    style="
+      background-image: url('/static/bg.png');
+      background-blend-mode: overlay;
+      background-color: rgba(255, 255, 255, 0.05);
+    "
+  >
+    <form
+      id="upload-form"
+      class="border-2 border-green-700 bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md space-y-6"
+    >
+      <!-- Styled container for the upload label -->
+      <div
+        class="border-2 border-green-700 bg-green-100 rounded-lg px-4 py-2 shadow-sm flex flex-col items-center space-y-3"
+      >
+        <!-- Label styled as a button -->
+        <!-- Label styled as a button with fixed width and ID -->
+        <label
+          id="upload-label"
+          for="file-input"
+          class="inline-block w-64 text-center truncate cursor-pointer text-white font-semibold bg-green-700 hover:bg-green-800 border-2 border-green-800 rounded-lg px-4 py-2 shadow-md transition"
+        >
+          📁 Upload Tomato Leaf Image
+        </label>
+
+        <!-- Visible file input (no duplicate) -->
+        <input
+          type="file"
+          id="file-input"
+          name="file"
+          class="block w-full text-sm text-gray-700 border-2 border-green-700 rounded-lg cursor-pointer bg-green-50 hover:border-green-800 transition"
+          accept="image/*"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-md"
+      >
+        🔍 Predict
+      </button>
+    </form>
+
+    <div
+      id="result"
+      class="mt-6 text-lg text-green-700 font-medium text-center px-4 py-3 bg-[#fbe4d5] backdrop-blur-md border border-green-300 rounded-lg shadow-inner w-full max-w-md"
+    ></div>
+    <style>
+      #result {
+        max-width: 500px; /* Adjust as needed */
+        width: 150%;
+        margin: 0.5rem auto 0; /* Top margin + center alignment */
+        padding: 1rem;
+        background-color: #fbe4d5; /* Soft skin tone */
+        border: 1px solid #86efac; /* Light green border */
+        border-radius: 1rem;
+        color: #065f46; /* Dark green text */
+        text-align: center;
+        font-weight: 550;
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+
+    <script>
+      const form = document.getElementById("upload-form");
+      const resultDiv = document.getElementById("result");
+      const fileInput = document.getElementById("file-input");
+      const uploadLabel = document.getElementById("upload-label");
+
+      // Change label text after file selection
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+          uploadLabel.textContent = `✅ Selected: ${fileInput.files[0].name}`;
+        } else {
+          uploadLabel.textContent = "📁 Upload Tomato Leaf Image";
+        }
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        resultDiv.textContent = "🔍 Predicting...";
+
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            resultDiv.innerHTML = `🧪 Prediction: <strong>${
+              data.class
+            }</strong><br>Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+          } else {
+            resultDiv.textContent = "❌ Prediction failed.";
+            console.error(data);
+          }
+        } catch (error) {
+          resultDiv.textContent = "❌ Could not connect to backend.";
+          console.error(error);
+        }
+      });
+    </script>
+  </body>
+</html>
