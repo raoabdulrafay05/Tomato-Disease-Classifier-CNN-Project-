@@ -21,7 +21,6 @@ Modular structure for easy updates and scalability.
 
 📈 **Future Improvements**
 
-Add confidence score to predictions.
 Deploy the app on a cloud platform (e.g., Render, Heroku, AWS).
 Expand to other plant diseases.
 
